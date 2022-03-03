@@ -1,67 +1,71 @@
 package com.addressbookapp.AddressBookAppDevelopment.service;
 
-import com.bridgelabz.addressbookapplication.dto.AddressBookDTO;
-import com.bridgelabz.addressbookapplication.model.Address;
-import com.bridgelabz.addressbookapplication.repository.AddressRepository;
+import com.addressbookapp.AddressBookAppDevelopment.dto.AddressBookDTO;
+import com.addressbookapp.AddressBookAppDevelopment.exception.AddressBookException;
+import com.addressbookapp.AddressBookAppDevelopment.model.Address;
+import com.addressbookapp.AddressBookAppDevelopment.repository.AddressRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+//Slf4j generates logger instance
 @Service
-public class AddressService {
+@Slf4j
+public class AddressService implements IAddressBookService {
+
+    //Autowired repository class to inject its dependency
     @Autowired
     AddressRepository repository;
 
-    public String getMessage(String name) {
-        return "Welcome " + name;
-    }
-
-    public String postMessage(Address address) {
-        return "Hello " + address.getFirstName() + " " + address.getLastName();
-    }
-
-    public String putMessage(String name) {
-        return "How are you, " + name;
-    }
-
+    //Created service method which serves controller api to return welcome message
     public String getWelcome() {
         return "Welcome to Address Book !";
     }
 
+    //Created service method which serves controller api to post data
     public Address saveDataToRepo(AddressBookDTO addressBookDTO) {
         Address newAddress = new Address(addressBookDTO);
         repository.save(newAddress);
         return newAddress;
     }
 
+    //Created service method which serves controller api to get record by id
     public Address getRecordById(Integer id) {
-        Address address = repository.getById(id);
-        return address;
+        Optional<Address> address = repository.findById(id);
+        if (address.isPresent()) {
+            return address.get();
+        } else throw new AddressBookException("Addressbook id not found");
     }
 
+    //Created service method which serves controller api to retrieve all records
     public List<Address> getRecord() {
-        return repository.findAll();
+        List<Address> addressBook = repository.findAll();
+        log.info("Found all records in Address ");
+        return addressBook;
     }
 
-    public List<Address> getRecordByFirstName(String firstName) {
-        List<Address> list = repository.findByFirstName(firstName);
-        return list;
-    }
-
-    public List<Address> getRecordByName() {
-        return repository.findAllData();
-    }
-
+    //Created service method which serves controller api to update record by id
     public Address updateRecordById(Integer id, AddressBookDTO addressBookDTO) {
+        Optional<Address> addressBook = repository.findById(id);
+        if (addressBook.isEmpty()) {
+            throw new AddressBookException("AddressBook details for id not found");
+        }
         Address newBook = new Address(id, addressBookDTO);
         repository.save(newBook);
         return newBook;
     }
 
+    //Created service method which serves controller api to delete record by id
     public String deleteRecordById(Integer id) {
-        repository.deleteById(id);
+        Optional<Address> newAddressBook = repository.findById(id);
+        if (newAddressBook.isEmpty()) {
+            throw new AddressBookException("Address Book Details not found");
+        } else {
+            repository.deleteById(id);
+        }
         return null;
     }
 

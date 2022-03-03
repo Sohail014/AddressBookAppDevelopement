@@ -1,6 +1,6 @@
 package com.addressbookapp.AddressBookAppDevelopment.dto;
 
-//Response DTO
+
 public class ResponseDTO {
     private String message;
     private Object data;

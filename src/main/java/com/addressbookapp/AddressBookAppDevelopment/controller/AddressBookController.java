@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -46,7 +47,7 @@ public class AddressBookController {
 
     //Ability to store a address book record to repo
     @PostMapping("/create")
-    public ResponseEntity<String> saveDataToRepo(@RequestBody AddressBookDTO addressBookDTO) {
+    public ResponseEntity<String> saveDataToRepo(@Valid @RequestBody AddressBookDTO addressBookDTO) {
         Address newAddress = service.saveDataToRepo(addressBookDTO);
         ResponseDTO responseDTO = new ResponseDTO("Address Book Record created successfully", newAddress);
         return new ResponseEntity(responseDTO, HttpStatus.CREATED);
@@ -81,7 +82,7 @@ public class AddressBookController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateRecordById(@PathVariable Integer id, @RequestBody AddressBookDTO addressBookDTO) {
+    public ResponseEntity<String> updateRecordById(@PathVariable Integer id, @Valid @RequestBody AddressBookDTO addressBookDTO) {
         Address newAddress = service.updateRecordById(id, addressBookDTO);
         ResponseDTO responseDTO = new ResponseDTO("Address Book Record updated successfully", newAddress);
         return new ResponseEntity(responseDTO, HttpStatus.OK);

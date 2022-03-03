@@ -6,6 +6,9 @@ import com.bridgelabz.addressbookapplication.repository.AddressRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class AddressService {
     @Autowired
@@ -33,8 +36,33 @@ public class AddressService {
         return newAddress;
     }
 
-    public String deleteDataById(Integer id) {
-        repository.deleteById(id);
-        return "Employee with unique ID:" + id + " got deleted";
+    public Address getRecordById(Integer id) {
+        Address address = repository.getById(id);
+        return address;
     }
+
+    public List<Address> getRecord() {
+        return repository.findAll();
+    }
+
+    public List<Address> getRecordByFirstName(String firstName) {
+        List<Address> list = repository.findByFirstName(firstName);
+        return list;
+    }
+
+    public List<Address> getRecordByName() {
+        return repository.findAllData();
+    }
+
+    public Address updateRecordById(Integer id, AddressBookDTO addressBookDTO) {
+        Address newBook = new Address(id, addressBookDTO);
+        repository.save(newBook);
+        return newBook;
+    }
+
+    public String deleteRecordById(Integer id) {
+        repository.deleteById(id);
+        return null;
+    }
+
 }

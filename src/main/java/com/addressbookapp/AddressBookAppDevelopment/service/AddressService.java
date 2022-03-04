@@ -4,6 +4,9 @@ import com.addressbookapp.AddressBookAppDevelopment.dto.AddressBookDTO;
 import com.addressbookapp.AddressBookAppDevelopment.exception.AddressBookException;
 import com.addressbookapp.AddressBookAppDevelopment.model.Address;
 import com.addressbookapp.AddressBookAppDevelopment.repository.AddressRepository;
+import com.addressbookapp.AddressBookAppDevelopment.util.EmailSenderService;
+import com.addressbookapp.AddressBookAppDevelopment.util.TokenUtil;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,53 +23,84 @@ public class AddressService implements IAddressBookService {
     @Autowired
     AddressRepository repository;
 
-    //Created service method which serves controller api to return welcome message
-    public String getWelcome() {
-        return "Welcome to Address Book !";
-    }
+    //Autowired Tokenutil  to inject its dependency
+    @Autowired
+    TokenUtil tokenutil;
+
+    //Autowired EmailSenderService  to inject its dependency
+    @Autowired
+    private EmailSenderService sender;
+
 
     //Created service method which serves controller api to post data
-    public Address saveDataToRepo(AddressBookDTO addressBookDTO) {
+    public String saveDataToRepo(AddressBookDTO addressBookDTO) {
         Address newAddress = new Address(addressBookDTO);
         repository.save(newAddress);
-        return newAddress;
+        String token = tokenutil.createToken(newAddress.getId());
+        sender.sendEmail(newAddress.getEmail(), "Test Email", "Registered SuccessFully, Hi "
+                + newAddress.getFirstName() + " click here -> " +
+                "http://localhost:8080/addressbook/getAll/" + token);
+        return token;
     }
 
-    //Created service method which serves controller api to get record by id
-    public Address getRecordById(Integer id) {
+
+    //Created service method which serves controller api to get record by token
+    @Override
+    public List<Address> getAddressBookDataToken(String token) {
+        int id = tokenutil.decodeToken(token);
+        Optional<Address> isContactPresent = repository.findById(id);
+        if (isContactPresent.isPresent()) {
+            List<Address> addressList = repository.findAll();
+            return addressList;
+        } else {
+            System.out.println("Exception ...Token not found!");
+            return null;
+        }
+    }
+
+    //Created  method which serves controller api to get record by token
+    @Override
+    public Address getRecordOfIdFromToken(String token) {
+        Integer id = tokenutil.decodeToken(token);
         Optional<Address> address = repository.findById(id);
         if (address.isPresent()) {
-            return address.get();
-        } else throw new AddressBookException("Addressbook id not found");
+            repository.getById(id);
+        } else {
+            throw new AddressBookException("Specific id not found");
+        }
+        return address.get();
     }
 
-    //Created service method which serves controller api to retrieve all records
-    public List<Address> getRecord() {
-        List<Address> addressBook = repository.findAll();
-        log.info("Found all records in Address ");
-        return addressBook;
-    }
 
-    //Created service method which serves controller api to update record by id
-    public Address updateRecordById(Integer id, AddressBookDTO addressBookDTO) {
+    //Created service method which serves controller api to update record by token
+    @Override
+    public Address updateRecordByToken(String token, AddressBookDTO addressBookDTO) {
+        Integer id = tokenutil.decodeToken(token);
         Optional<Address> addressBook = repository.findById(id);
         if (addressBook.isEmpty()) {
             throw new AddressBookException("AddressBook details for id not found");
         }
         Address newBook = new Address(id, addressBookDTO);
         repository.save(newBook);
+        sender.sendEmail(newBook.getEmail(), "Test Email", "Updated SuccessFully "
+                + newBook.getFirstName() + " click here -> " +
+                "http://localhost:8080/addressbook/getAll/" + token);
         return newBook;
     }
 
-    //Created service method which serves controller api to delete record by id
-    public String deleteRecordById(Integer id) {
+    //Created service method which serves controller api to delete record by token
+    @Override
+    public Address deleteRecordByToken(String token) {
+        Integer id = tokenutil.decodeToken(token);
         Optional<Address> newAddressBook = repository.findById(id);
         if (newAddressBook.isEmpty()) {
             throw new AddressBookException("Address Book Details not found");
         } else {
             repository.deleteById(id);
+            sender.sendEmail(newAddressBook.get().getEmail(), "Test Email", "Deleted SuccessFully.. "
+                    + newAddressBook.get() + " click here -> " +
+                    "http://localhost:8080/addressbook/getAll/" + token);
         }
-        return null;
+        return newAddressBook.get();
     }
-
 }

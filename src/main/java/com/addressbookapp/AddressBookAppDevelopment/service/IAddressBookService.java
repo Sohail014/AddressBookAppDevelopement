@@ -3,21 +3,20 @@ package com.addressbookapp.AddressBookAppDevelopment.service;
 import com.addressbookapp.AddressBookAppDevelopment.dto.AddressBookDTO;
 import com.addressbookapp.AddressBookAppDevelopment.model.Address;
 
-
 import java.util.List;
 
 //Created interface for all service methods to achieve abstraction
 public interface IAddressBookService {
 
-    public String getWelcome();
 
-    public Address saveDataToRepo(AddressBookDTO addressBookDTO);
+    public String saveDataToRepo(AddressBookDTO addressBookDTO);
 
-    public Address getRecordById(Integer id);
+    public List<Address> getAddressBookDataToken(String token);
 
-    public List<Address> getRecord();
+    public Address getRecordOfIdFromToken(String token);
 
-    public Address updateRecordById(Integer id, AddressBookDTO addressBookDTO);
+    public Address updateRecordByToken(String token, AddressBookDTO addressBookDTO);
 
-    public String deleteRecordById(Integer id);
+    public Address deleteRecordByToken(String token);
+
 }

@@ -15,7 +15,7 @@ public class AddressBookDTO {
     private String firstName;
 
     @NotEmpty(message = "Last name cant be empty")
-    @Pattern(regexp = "^[A-Z]{1}[a-zA-Z]{2,}$", message = "Employee lastName is Invalid")
+    @Pattern(regexp = "^[A-Z]{1}[a-zA-Z]{2,}$", message = "Employee lastname is Invalid")
     private String lastName;
 
     @Email
@@ -32,7 +32,7 @@ public class AddressBookDTO {
     @NotNull(message = "zip cant be empty")
     private Integer zip;
 
-
+    //Default
     public AddressBookDTO() {
         super();
     }
